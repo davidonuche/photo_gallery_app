@@ -16,14 +16,14 @@ class _PhotoGalleryScreenState extends State<PhotoGalleryScreen> {
         child: Padding(
           padding: const EdgeInsets.all(8),
           child: GridView.builder(
-            itemCount: 6,
+            itemCount: 36,
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 3,
+              crossAxisCount: 4,
               crossAxisSpacing: 6.0,
               mainAxisSpacing: 6.0,
                ), 
                itemBuilder: (context, index) {
-                return Image.network("https://placeimg.com/640/480/any", fit: BoxFit.cover);
+                return Image.network("https://placeimg.com/640/480/any");
                },
                ),
           ),
