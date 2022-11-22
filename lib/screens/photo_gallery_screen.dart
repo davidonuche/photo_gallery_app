@@ -49,10 +49,10 @@ class _PhotoGalleryScreenState extends State<PhotoGalleryScreen> {
                   return const Center(child: CircularProgressIndicator());
                 case ConnectionState.done:
                   return GridView.builder(
-                    itemCount: snapshot.data.length ?? 0,
+                    itemCount: snapshot.data?.length ?? 0,
                     gridDelegate:
                         const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 4,
+                      crossAxisCount: 3,
                       crossAxisSpacing: 6.0,
                       mainAxisSpacing: 6.0,
                     ),
