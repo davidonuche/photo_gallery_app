@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:photo_gallery_app/services/keys.dart';
+import 'package:photo_gallery_app/services/models/photos_model.dart';
 import 'package:photo_gallery_app/services/network_helper.dart';
 
 class PhotoGalleryScreen extends StatefulWidget {
@@ -10,26 +11,12 @@ class PhotoGalleryScreen extends StatefulWidget {
 }
 
 class _PhotoGalleryScreenState extends State<PhotoGalleryScreen> {
-  Future<List<String>>? images;
-  Future<List<String>>? getImagesFromPixaby() async {
-    List<String> pixabyImages = [];
-    String url =
-        "https://pixabay.com/api/?key=$pixabyApiKey&image_type=photo&per_page=20&category=nature&page-1";
-    NetworkHelper networkHelper = NetworkHelper(url: url);
-    Map<String, dynamic> data = await networkHelper.getData();
-    for (var entry in data["hits"]) {
-      pixabyImages.add(entry["largeImageURL"]);
-    }
-
-    // String image = data["hits"][0]["largeImageURL"];
-    // pixabyImages.add(image);
-    return pixabyImages;
-  }
+  Future<PhotosModel>? _fetchPhoto;
 
   @override
   void initState() {
-    images = getImagesFromPixaby();
     super.initState();
+    _fetchPhoto = NetworkHelper.getPhotos();
   }
 
   @override
@@ -38,9 +25,9 @@ class _PhotoGalleryScreenState extends State<PhotoGalleryScreen> {
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(8),
-          child: FutureBuilder<List<String>>(
-            future: images,
-            builder: (BuildContext context, AsyncSnapshot snapshot) {
+          child: FutureBuilder(
+            future: _fetchPhoto,
+            builder: (BuildContext context, snapshot) {
               switch (snapshot.connectionState) {
                 case ConnectionState.none:
                   return const Center(child: Text("Error"));
@@ -49,7 +36,7 @@ class _PhotoGalleryScreenState extends State<PhotoGalleryScreen> {
                   return const Center(child: CircularProgressIndicator());
                 case ConnectionState.done:
                   return GridView.builder(
-                    itemCount: snapshot.data?.length ?? 0,
+                    itemCount: snapshot.data!.hits!.length,
                     gridDelegate:
                         const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 3,
@@ -58,7 +45,7 @@ class _PhotoGalleryScreenState extends State<PhotoGalleryScreen> {
                     ),
                     itemBuilder: (context, index) {
                       return Image.network(
-                        snapshot.data![index],
+                        snapshot.data!.hits![index].previewUrl!,
                         fit: BoxFit.cover,
                       );
                     },
