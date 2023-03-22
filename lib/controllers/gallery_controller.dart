@@ -1,15 +1,22 @@
-import 'package:bloc/bloc.dart';
-import 'package:equatable/equatable.dart';
+import 'package:get/get.dart';
+
 import '../keys.dart';
 import '../services/network_helper.dart';
-part  "gallery_state.dart";
 
-class GalleryCubit extends Cubit<GalleryState> {
-  GalleryCubit() : super(GalleryInitial());
+class GalleryController extends GetxController {
+  @override
+  onInit() {
+    super.onInit();
+    getImages();
+  }
 
-  Future<void> getImagesFromPixaby() async {
-    emit(GalleryLoading());
-    //
+  List<String> _images = [];
+
+  List<String> get images => _images;
+
+  int get photoCount => _images.length;
+
+  Future<void> getImages() async {
     List<String> pixabyImages = [];
 
     String url =
@@ -19,8 +26,7 @@ class GalleryCubit extends Cubit<GalleryState> {
     for (var entry in data["hits"]) {
       pixabyImages.add(entry["largeImageURL"]);
     }
-    //
-     emit(GalleryLoaded(images: pixabyImages));
-    
+    _images = pixabyImages;
+    update();
   }
 }
