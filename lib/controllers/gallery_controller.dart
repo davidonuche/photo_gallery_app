@@ -10,6 +10,8 @@ class GalleryController extends GetxController {
     getImages();
   }
 
+  int _page = 1;
+
   List<String> _images = [];
 
   List<String> get images => _images;
@@ -20,13 +22,28 @@ class GalleryController extends GetxController {
     List<String> pixabyImages = [];
 
     String url =
-        "https://pixabay.com/api/?key=$pixabyApiKey&image_type=photo&per_page=20&category==nature&page=1";
+        "https://pixabay.com/api/?key=$pixabyApiKey&image_type=photo&per_page=20&category==nature&page=$_page";
     NetworkHelper networkHelper = NetworkHelper(url: url);
     Map<String, dynamic> data = await networkHelper.getData();
     for (var entry in data["hits"]) {
       pixabyImages.add(entry["largeImageURL"]);
     }
     _images = pixabyImages;
+    update();
+  }
+
+  Future<void> loadMore() async {
+    List<String> pixabyImages = [];
+
+    String url =
+        "https://pixabay.com/api/?key=$pixabyApiKey&image_type=photo&per_page=20&category==nature&page=${_page + 1}";
+    _page++;
+    NetworkHelper networkHelper = NetworkHelper(url: url);
+    Map<String, dynamic> data = await networkHelper.getData();
+    for (var entry in data["hits"]) {
+      pixabyImages.add(entry["largeImageURL"]);
+    }
+    _images.addAll(pixabyImages);
     update();
   }
 }
