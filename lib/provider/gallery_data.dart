@@ -1,15 +1,13 @@
-import 'package:flutter/material.dart';
-
 import '../keys.dart';
 import '../services/network_helper.dart';
 
-class GalleryData extends ChangeNotifier {
-  List<String> _images = [];
-  List<String> get images => [..._images];
-  int get imagesCount =>  _images.length;
+class GalleryData {
+  //Future<List<String>>? _images;
+  //List<String> get images => [..._images];
+  //int get imagesCount =>  _images.length;
   
 
-  Future<void> getImagesFromPixaby() async {
+  Future<List<String>> getImagesFromPixaby() async {
     List<String> pixabyImages = [];
 
     String url =
@@ -19,7 +17,6 @@ class GalleryData extends ChangeNotifier {
     for (var entry in data["hits"]) {
       pixabyImages.add(entry["largeImageURL"]);
     }
-    _images = pixabyImages;
-    notifyListeners();
+    return pixabyImages;
   }
 }
