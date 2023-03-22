@@ -13,20 +13,30 @@ class PhotoGalleryScreen extends StatelessWidget {
       body: SafeArea(
         child: Padding(
           padding: EdgeInsets.all(8),
-          child: GetBuilder<GalleryController>(builder: (controller) {
-            return GridView.builder(
-              itemCount: controller.images.length,
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 3,
-                crossAxisSpacing: 6.0,
-                mainAxisSpacing: 6.0,
-              ),
-              itemBuilder: (context, index) {
-                return Image.network(controller.images[index],
-                    fit: BoxFit.cover);
-              },
-            );
-          }),
+          child: GetBuilder<GalleryController>(
+            builder: (controller) {
+              if (controller.status == GalleryStatus.loading) {
+                return Center(
+                  child: CircularProgressIndicator(),
+                );
+              }
+              if (controller.status == GalleryStatus.loaded) {
+                return GridView.builder(
+                  itemCount: controller.images.length,
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 3,
+                    crossAxisSpacing: 6.0,
+                    mainAxisSpacing: 6.0,
+                  ),
+                  itemBuilder: (context, index) {
+                    return Image.network(controller.images[index],
+                        fit: BoxFit.cover);
+                  },
+                );
+              }
+              return Container();
+            },
+          ),
         ),
       ),
       floatingActionButton: FloatingActionButton(

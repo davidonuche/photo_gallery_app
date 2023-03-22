@@ -3,12 +3,21 @@ import 'package:get/get.dart';
 import '../keys.dart';
 import '../services/network_helper.dart';
 
+enum GalleryStatus {
+  loading,
+  initial,
+  loaded,
+  error,
+}
+
 class GalleryController extends GetxController {
   @override
   onInit() {
     super.onInit();
     getImages();
   }
+
+  GalleryStatus status = GalleryStatus.initial;
 
   int _page = 1;
 
@@ -19,6 +28,8 @@ class GalleryController extends GetxController {
   int get photoCount => _images.length;
 
   Future<void> getImages() async {
+    status = GalleryStatus.loading;
+    update();
     List<String> pixabyImages = [];
 
     String url =
@@ -29,10 +40,13 @@ class GalleryController extends GetxController {
       pixabyImages.add(entry["largeImageURL"]);
     }
     _images = pixabyImages;
+    status = GalleryStatus.loaded;
     update();
   }
 
   Future<void> loadMore() async {
+    status = GalleryStatus.loading;
+    update();
     List<String> pixabyImages = [];
 
     String url =
@@ -44,6 +58,7 @@ class GalleryController extends GetxController {
       pixabyImages.add(entry["largeImageURL"]);
     }
     _images.addAll(pixabyImages);
+    status = GalleryStatus.loaded;
     update();
   }
 }
