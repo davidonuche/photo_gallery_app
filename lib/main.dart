@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-
+import 'package:photo_gallery_app/provider/gallery_data.dart';
+import 'package:provider/provider.dart';
 import 'screens/photo_gallery_screen.dart';
 
 void main() {
@@ -12,10 +13,13 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData.dark(),
-      home: PhotoGalleryScreen(),
+    return ChangeNotifierProvider(
+      create: (context) => GalleryData()..getImagesFromPixaby(),
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData.dark(),
+        home: PhotoGalleryScreen(),
+      ),
     );
   }
 }
