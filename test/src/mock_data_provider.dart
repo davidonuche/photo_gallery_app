@@ -1,17 +1,16 @@
-import 'package:http/http.dart' as http;
 import 'dart:convert';
 
+import 'package:http/http.dart';
 
-class DataHttpException implements Exception {
-  DataHttpException(this.statusCode);
+class TestDataHttpException implements Exception {
+  TestDataHttpException(this.statusCode);
   final int statusCode;
 }
-class NetworkHelper {
-  NetworkHelper({required this.url});
-  final String url;
+
+class MockDataProvider {
+  Client client = Client();
   Future<dynamic> getData() async {
-    http.Response response;
-    response = await http.get(Uri.parse(url));
+    final response = await client.get(Uri.parse("test"));
     // Means success
     if (response.statusCode == 200) {
       // json
@@ -21,7 +20,7 @@ class NetworkHelper {
       dynamic jsonObjects = jsonDecode(data);
       return jsonObjects;
     } else {
-      throw DataHttpException(response.statusCode);
+     throw TestDataHttpException(response.statusCode);
     }
   }
 }
