@@ -1,6 +1,6 @@
+// controllers/gallery_controller.dart
 import 'package:get/get.dart';
-
-import '../keys.dart';
+import 'package:photo_gallery_app/keys.dart';
 import '../services/network_helper.dart';
 
 enum GalleryStatus {
@@ -12,53 +12,51 @@ enum GalleryStatus {
 
 class GalleryController extends GetxController {
   @override
-  onInit() {
+  void onInit() {
     super.onInit();
     getImages();
   }
 
   GalleryStatus status = GalleryStatus.initial;
-
   int _page = 1;
-
-  List<String> _images = [];
+  final List<String> _images = [];
 
   List<String> get images => _images;
-
   int get photoCount => _images.length;
 
   Future<void> getImages() async {
-    status = GalleryStatus.loading;
-    update();
-    List<String> pixabyImages = [];
-
-    String url =
-        "https://pixabay.com/api/?key=$pixabyApiKey&image_type=photo&per_page=20&category==nature&page=$_page";
-    NetworkHelper networkHelper = NetworkHelper(url: url);
-    Map<String, dynamic> data = await networkHelper.getData();
-    for (var entry in data["hits"]) {
-      pixabyImages.add(entry["largeImageURL"]);
-    }
-    _images = pixabyImages;
-    status = GalleryStatus.loaded;
-    update();
+    await _fetchImages(reset: true);
   }
 
   Future<void> loadMore() async {
+    await _fetchImages(reset: false);
+  }
+
+  Future<void> _fetchImages({required bool reset}) async {
     status = GalleryStatus.loading;
     update();
-    List<String> pixabyImages = [];
-
-    String url =
-        "https://pixabay.com/api/?key=$pixabyApiKey&image_type=photo&per_page=20&category==nature&page=${_page + 1}";
-    _page++;
-    NetworkHelper networkHelper = NetworkHelper(url: url);
-    Map<String, dynamic> data = await networkHelper.getData();
-    for (var entry in data["hits"]) {
-      pixabyImages.add(entry["largeImageURL"]);
+    
+    if (reset) {
+      _page = 1;
+      _images.clear();
+    } else {
+      _page++;
     }
-    _images.addAll(pixabyImages);
-    status = GalleryStatus.loaded;
+
+    String url = 'https://pixabay.com/api/?key=$pixabyApiKey&image_type=photo&per_page=20&category=nature&page=$_page';
+    NetworkHelper networkHelper = NetworkHelper(url: url);
+
+    try {
+      Map<String, dynamic> data = await networkHelper.getData();
+      List<String> pixabyImages = List<String>.from(data["hits"].map((entry) => entry["largeImageURL"]));
+
+      _images.addAll(pixabyImages);
+      status = GalleryStatus.loaded;
+    } catch (e) {
+      status = GalleryStatus.error;
+      Get.snackbar('Error', 'Failed to load images');
+    }
+
     update();
   }
 }

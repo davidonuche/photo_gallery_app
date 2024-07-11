@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:photo_gallery_app/controllers/gallery_controller.dart';
+import '../controllers/gallery_controller.dart';
 
 class PhotoGalleryScreen extends StatelessWidget {
   PhotoGalleryScreen({super.key});
@@ -29,9 +29,13 @@ class PhotoGalleryScreen extends StatelessWidget {
                     mainAxisSpacing: 6.0,
                   ),
                   itemBuilder: (context, index) {
-                    return Image.network(controller.images[index],
-                        fit: BoxFit.cover);
+                    return Image.network(controller.images[index], fit: BoxFit.cover);
                   },
+                );
+              }
+              if (controller.status == GalleryStatus.error) {
+                return Center(
+                  child: Text('Failed to load images'),
                 );
               }
               return Container();
