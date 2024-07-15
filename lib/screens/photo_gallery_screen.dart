@@ -5,7 +5,7 @@ import '../controllers/gallery_controller.dart';
 class PhotoGalleryScreen extends StatelessWidget {
   PhotoGalleryScreen({super.key});
 
-  final GalleryController galleryController = Get.put(GalleryController());
+  final GalleryController controller = Get.put(GalleryController());
 
   @override
   Widget build(BuildContext context) {
@@ -13,39 +13,62 @@ class PhotoGalleryScreen extends StatelessWidget {
       body: SafeArea(
         child: Padding(
           padding: EdgeInsets.all(8),
-          child: GetBuilder<GalleryController>(
-            builder: (controller) {
-              if (controller.status == GalleryStatus.loading) {
-                return Center(
-                  child: CircularProgressIndicator(),
-                );
-              }
-              if (controller.status == GalleryStatus.loaded) {
-                return GridView.builder(
-                  itemCount: controller.images.length,
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 3,
-                    crossAxisSpacing: 6.0,
-                    mainAxisSpacing: 6.0,
-                  ),
-                  itemBuilder: (context, index) {
-                    return Image.network(controller.images[index], fit: BoxFit.cover);
-                  },
-                );
-              }
-              if (controller.status == GalleryStatus.error) {
-                return Center(
-                  child: Text('Failed to load images'),
-                );
-              }
-              return Container();
-            },
-          ),
+          child: Obx(() {
+            if (controller.status.value == GalleryStatus.loading &&
+                controller.images.isEmpty) {
+              return Center(
+                child: CircularProgressIndicator(),
+              );
+            }
+            if (controller.status.value == GalleryStatus.loaded ||
+                (controller.status.value == GalleryStatus.loading &&
+                    controller.images.isNotEmpty)) {
+              return GridView.builder(
+                itemCount: controller.images.length,
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 3,
+                  crossAxisSpacing: 6.0,
+                  mainAxisSpacing: 6.0,
+                ),
+                itemBuilder: (context, index) {
+                  return GestureDetector(
+                    onTap: () {
+                      showDialog(
+                        context: context,
+                        builder: (context) => Dialog(
+                          backgroundColor: Colors.transparent,
+                          child: GestureDetector(
+                            onTap: () {
+                              Navigator.of(context).pop();
+                            },
+                            child: Image.network(
+                              controller.images[index],
+                              fit: BoxFit.contain,
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                    child: Image.network(
+                      controller.images[index],
+                      fit: BoxFit.cover,
+                    ),
+                  );
+                },
+              );
+            }
+            if (controller.status.value == GalleryStatus.error) {
+              return Center(
+                child: Text('Failed to load images'),
+              );
+            }
+            return Container();
+          }),
         ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          galleryController.loadMore();
+          controller.loadMore();
         },
         child: Icon(Icons.add),
       ),

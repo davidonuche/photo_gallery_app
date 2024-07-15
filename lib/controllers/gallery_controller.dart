@@ -1,62 +1,53 @@
-// controllers/gallery_controller.dart
 import 'package:get/get.dart';
-import 'package:photo_gallery_app/keys.dart';
-import '../services/network_helper.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
-enum GalleryStatus {
-  loading,
-  initial,
-  loaded,
-  error,
-}
+const String pixabayApiKey = "29058379-bae466c042e6a761694bdc488";
+const String pixabayBaseUrl = "https://pixabay.com/api/";
+
+enum GalleryStatus { loading, loaded, error }
 
 class GalleryController extends GetxController {
+  var images = <String>[].obs;
+  var status = GalleryStatus.loading.obs;
+  int currentPage = 1;
+  int initialLoadCount = 20;
+  int subsequentLoadCount = 20;
+  bool isLoadingMore = false;
+
   @override
   void onInit() {
     super.onInit();
-    getImages();
+    fetchImages(initialLoadCount);
   }
 
-  GalleryStatus status = GalleryStatus.initial;
-  int _page = 1;
-  final List<String> _images = [];
-
-  List<String> get images => _images;
-  int get photoCount => _images.length;
-
-  Future<void> getImages() async {
-    await _fetchImages(reset: true);
-  }
-
-  Future<void> loadMore() async {
-    await _fetchImages(reset: false);
-  }
-
-  Future<void> _fetchImages({required bool reset}) async {
-    status = GalleryStatus.loading;
-    update();
-    
-    if (reset) {
-      _page = 1;
-      _images.clear();
-    } else {
-      _page++;
-    }
-
-    String url = 'https://pixabay.com/api/?key=$pixabyApiKey&image_type=photo&per_page=20&category=nature&page=$_page';
-    NetworkHelper networkHelper = NetworkHelper(url: url);
-
+  void fetchImages(int count) async {
+    status.value = GalleryStatus.loading;
     try {
-      Map<String, dynamic> data = await networkHelper.getData();
-      List<String> pixabyImages = List<String>.from(data["hits"].map((entry) => entry["largeImageURL"]));
-
-      _images.addAll(pixabyImages);
-      status = GalleryStatus.loaded;
+      final response = await http.get(Uri.parse(
+          '$pixabayBaseUrl?key=$pixabayApiKey&q=nature&image_type=photo&per_page=$count&page=$currentPage'));
+      if (response.statusCode == 200) {
+        final jsonResponse = json.decode(response.body);
+        final imageList = jsonResponse['hits'] as List;
+        images.addAll(
+            imageList.map((image) => image['webformatURL'] as String).toList());
+        status.value = GalleryStatus.loaded;
+        print("Images fetched: ${images.length}");
+      } else {
+        status.value = GalleryStatus.error;
+        print("Failed to load images: ${response.statusCode}");
+      }
     } catch (e) {
-      status = GalleryStatus.error;
-      Get.snackbar('Error', 'Failed to load images');
+      status.value = GalleryStatus.error;
+      print("Error fetching images: $e");
     }
+  }
 
-    update();
+  void loadMore() async {
+    if (isLoadingMore) return;
+    isLoadingMore = true;
+    currentPage++;
+    fetchImages(subsequentLoadCount);
+    isLoadingMore = false;
   }
 }

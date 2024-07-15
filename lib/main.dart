@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'screens/photo_gallery_screen.dart';
-
+import 'controllers/audio_controller.dart';
 
 void main() {
   runApp(const MyApp());
@@ -11,9 +12,12 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    final AudioController audioController = Get.put(AudioController());
+    audioController.play();
+
+    return GetMaterialApp(
       debugShowCheckedModeBanner: false,
-      // theme: ,
+      theme: ThemeData.dark(),
       home: PhotoGalleryScreen(),
     );
   }
