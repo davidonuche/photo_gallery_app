@@ -67,10 +67,15 @@ class PhotoGalleryScreen extends StatelessWidget {
         ),
       ),
       floatingActionButton: FloatingActionButton(
+        backgroundColor: Colors.yellow,
         onPressed: () {
           controller.loadMore();
         },
-        child: Icon(Icons.add),
+        child: Icon(
+          Icons.add,
+          size: 24,
+          color: Colors.blue,
+        ),
       ),
     );
   }
